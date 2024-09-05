@@ -1,0 +1,64 @@
+<html>
+  <head>
+    <title>D3 in Action Chapter 4 - Example 1</title>
+    <meta charset="utf-8" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- D3.js 라이브러리 CDN -->
+  </head>
+  <style>
+    svg {
+      height: 500px;
+      width: 500px;
+      border: 1px solid gray;
+    }
+  </style>
+  <body>
+    <div id="viz">
+      <svg></svg>
+    </div>
+  </body>
+  <footer>
+    <script>
+      d3.csv("cities.csv").then(function (data) {
+        dataViz(data);
+      });
+
+      function dataViz(incomingData) {
+        // 최대 인구수를 구하기 위해 d3.max() 사용
+        var maxPopulation = d3.max(incomingData, function (el) {
+          return parseInt(el.population);
+        });
+
+        // yScale 정의, range의 형식은 배열로 전달해야 함 [0, 460]
+        var yScale = d3
+          .scaleLinear()
+          .domain([0, maxPopulation])
+          .range([0, 460]);
+
+        // SVG 크기 설정
+        d3.select("svg").attr("style", "height:480px; width:600px");
+
+        // 막대 차트 생성
+        d3.select("svg")
+          .selectAll("rect")
+          .data(incomingData)
+          .enter()
+          .append("rect")
+          .attr("width", 50)
+          .attr("height", function (d) {
+            return yScale(parseInt(d.population));
+          })
+          .attr("x", function (d, i) {
+            return i * 60;
+          })
+          .attr("y", function (d) {
+            return 480 - yScale(parseInt(d.population)); // 막대 위치 설정
+          })
+          .style("fill", "blue")
+          .style("stroke", "red")
+          .style("stroke-width", "1px")
+          .style("opacity", 0.25);
+      }
+    </script>
+  </footer>
+</html>
