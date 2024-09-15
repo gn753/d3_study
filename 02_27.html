@@ -47,6 +47,8 @@
           .domain([0, maxImpact])
           .range([1, 20]);
 
+        var filterdData = incomingData.filter((el) => el.impact > 0);
+
         // circle 요소를 추가하고 속성 설정
         d3.select("svg")
           .selectAll("circle")
@@ -67,6 +69,13 @@
           .style("fill", "#990000")
           .style("stroke", "black")
           .style("stroke-width", "1px");
+
+        d3.selectAll("circle")
+          .data(filterdData, function (d) {
+            return JSON.stringify(d);
+          })
+          .exit()
+          .remove();
       }
     </script>
   </footer>

@@ -1,0 +1,150 @@
+<html>
+  <head>
+    <title>D3 in Action Chapter 4 - Example 10</title>
+    <meta charset="utf-8" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <style>
+    svg {
+      height: 500px;
+      width: 500px;
+      border: 1px solid gray;
+    }
+    line {
+      shape-rendering: crispEdges;
+      stroke: #000000;
+    }
+
+    line.minor {
+      stroke: #777777;
+      stroke-dasharray: 2, 2;
+    }
+
+    path.domain {
+      fill: none;
+      stroke: black;
+    }
+  </style>
+  <body>
+    <div id="viz">
+      <svg></svg>
+    </div>
+    <div id="controls" />
+  </body>
+  <footer>
+    <script>
+      d3.csv("tweetdata.csv").then(lineChart);
+
+      function lineChart(data) {
+        // 스케일 설정
+        const xScale = d3.scaleLinear().domain([1, 10.5]).range([20, 480]);
+        const yScale = d3.scaleLinear().domain([0, 35]).range([480, 20]);
+
+        // x축 설정
+        const xAxis = d3
+          .axisBottom(xScale)
+          .tickSize(480)
+          .tickValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+        d3.select("svg").append("g").attr("id", "xAxisG").call(xAxis);
+
+        // y축 설정
+        const yAxis = d3.axisRight(yScale).ticks(10).tickSize(480);
+
+        d3.select("svg").append("g").attr("id", "yAxisG").call(yAxis);
+
+        // tweets 데이터에 대한 원(circle) 추가
+        d3.select("svg")
+          .selectAll("circle.tweets")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", "tweets")
+          .attr("r", 5)
+          .attr("cx", function (d) {
+            return xScale(d.day);
+          })
+          .attr("cy", function (d) {
+            return yScale(d.tweets);
+          })
+          .style("fill", "black");
+
+        // retweets 데이터에 대한 원(circle) 추가
+        d3.select("svg")
+          .selectAll("circle.retweets")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", "retweets")
+          .attr("r", 5)
+          .attr("cx", function (d) {
+            return xScale(d.day);
+          })
+          .attr("cy", function (d) {
+            return yScale(d.retweets);
+          })
+          .style("fill", "lightgray");
+
+        // favorites 데이터에 대한 원(circle) 추가
+        d3.select("svg")
+          .selectAll("circle.favorites")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", "favorites")
+          .attr("r", 5)
+          .attr("cx", function (d) {
+            return xScale(d.day);
+          })
+          .attr("cy", function (d) {
+            return yScale(d.favorites);
+          })
+          .style("fill", "gray");
+
+        // 라인 생성기 정의
+        const tweetLine = d3
+          .line()
+          .x((d) => xScale(d.day)) // x 좌표는 day 값을 사용
+          .y((d) => yScale(d.tweets)) // y 좌표는 tweets 값을 사용
+          .curve(d3.curveLinear); // 기본 곡선 유형 설정
+
+        const retweetLine = d3
+          .line()
+          .x((d) => xScale(d.day)) // x 좌표는 day 값을 사용
+          .y((d) => yScale(d.retweets)) // y 좌표는 tweets 값을 사용
+          .curve(d3.curveLinear); // 기본 곡선 유형 설정
+
+        const favLine = d3
+          .line()
+          .x((d) => xScale(d.day)) // x 좌표는 day 값을 사용
+          .y((d) => yScale(d.favorites)) // y 좌표는 tweets 값을 사용
+          .curve(d3.curveLinear); // 기본 곡선 유형 설정
+
+        // 트윗 데이터로 라인 그리기
+        d3.select("svg")
+          .append("path")
+          .datum(data) // 데이터 바인딩
+          .attr("d", tweetLine) // tweetLine으로 path 생성
+          .attr("fill", "none")
+          .attr("stroke", "darkred")
+          .attr("stroke-width", 2);
+
+        d3.select("svg")
+          .append("path")
+          .datum(data) // 데이터 바인딩
+          .attr("d", retweetLine) // tweetLine으로 path 생성
+          .attr("fill", "none")
+          .attr("stroke", "gray")
+          .attr("stroke-width", 3);
+
+        d3.select("svg")
+          .append("path")
+          .datum(data) // 데이터 바인딩
+          .attr("d", favLine) // tweetLine으로 path 생성
+          .attr("fill", "none")
+          .attr("stroke", "black")
+          .attr("stroke-width", 2);
+      }
+    </script>
+  </footer>
+</html>

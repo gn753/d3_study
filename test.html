@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>D3 in Action Chapter 4 - Example 1</title>
+    <meta charset="utf-8" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <style>
+    svg {
+      height: 500px;
+      width: 500px;
+      border: 1px solid gray;
+    }
+  </style>
+  <body>
+    <div id="viz">
+      <svg></svg>
+    </div>
+    <div id="controls" />
+  </body>
+  <footer>
+    <script>
+      d3.json("tweets.json").then((data) => dataViz(data.tweets));
+
+      function dataViz(incomingData) {
+        // 데이터 처리
+        incomingData.forEach(function (el) {
+          el.impact = el.favorites.length + el.retweets.length;
+          el.tweetTime = new Date(el.timestamp);
+        });
+
+        // 여백 설정
+        const margin = { top: 20, right: 40, bottom: 40, left: 50 };
+        const width = 500 - margin.left - margin.right;
+        const height = 500 - margin.top - margin.bottom;
+
+        // 최고의 영향력 값 찾기
+        const maxImpact = d3.max(incomingData, function (el) {
+          return el.impact;
+        });
+
+        // 시간 범위 설정
+        const startEnd = d3.extent(incomingData, function (el) {
+          return el.tweetTime;
+        });
+
+        // x, y 스케일 설정
+        const timeRamp = d3.scaleTime().domain(startEnd).range([0, width]);
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, maxImpact])
+          .range([height, 0]); // y축을 반전
+
+        // SVG 선택 및 변환 설정
+        const svg = d3
+          .select("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+        // 원(circle) 추가
+        svg
+          .selectAll("circle")
+          .data(incomingData)
+          .enter()
+          .append("circle")
+          .attr("r", 5)
+          .attr("cx", function (d) {
+            return timeRamp(d.tweetTime);
+          }) 
+          .attr("cy", function (d) {
+            return yScale(d.impact);
+          });
+
+        // x축 생성 및 렌더링
+        const xAxis = d3.axisBottom(timeRamp); // timeRamp를 x축으로 사용
+        svg
+          .append("g")
+          .attr("transform", `translate(0, ${height})`) // x축을 아래로 이동
+          .call(xAxis);
+
+        // y축 생성 및 렌더링
+        const yAxis = d3.axisLeft(yScale); // y축은 왼쪽에 배치
+        svg.append("g").call(yAxis);
+      }
+    </script>
+  </footer>
+</html>
